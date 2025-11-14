@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, BookOpen, ClipboardList, Briefcase, Calendar, LogOut, User, Star, Megaphone } from 'lucide-react';
+import { Home, BookOpen, ClipboardList, Briefcase, Calendar, LogOut, User, Star, Megaphone, Sparkles } from 'lucide-react';
 
 const Sidebar = ({ activeSection, setActiveSection }) => {
     return (
@@ -16,6 +16,13 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
                 >
                     <Home className="w-5 h-5" />
                     <span>Dashboard</span>
+                </button>
+                <button
+                    onClick={() => setActiveSection('hiregenie')}
+                    className={`sidebar-button ${activeSection === 'hiregenie' ? 'active' : ''} sidebar-button-genie`}
+                >
+                    <Sparkles className="w-5 h-5" />
+                    <span>HireGenie AI</span>
                 </button>
                 <button
                     onClick={() => setActiveSection('profile')}

@@ -9,7 +9,8 @@ const Profile = () => {
     const [editedProfile, setEditedProfile] = useState(null);
     const [saving, setSaving] = useState(false);
 
-    const username = "alex.johnson.student";
+    // const username = "alex.johnson.student";
+    const username = "john.doe.faculty";
     const API_BASE_URL = "http://localhost:8081/api/profile";
 
     useEffect(() => {

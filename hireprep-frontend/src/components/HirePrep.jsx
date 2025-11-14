@@ -9,15 +9,24 @@ import Placements from './Placements';
 import Reviews from './Reviews';
 import NoticeBoard from './NoticeBoard';
 import Attendance from './Attendance';
+import HireGenie from './HireGenie';
 
 const HirePrep = () => {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [showAIBot, setShowAIBot] = useState(false);
+    const [geniePrompt, setGeniePrompt] = useState('');
+
+    const handleNavigateToGenie = (prompt) => {
+        setGeniePrompt(prompt);
+        setActiveSection('hiregenie');
+    };
 
     const renderContent = () => {
         switch (activeSection) {
             case 'dashboard':
-                return <Dashboard />;
+                return <Dashboard onNavigateToGenie={handleNavigateToGenie} />;
+            case 'hiregenie':
+                return <HireGenie initialPrompt={geniePrompt} key={geniePrompt} />;
             case 'profile':
                 return <Profile />;
             case 'resources':
@@ -33,7 +42,7 @@ const HirePrep = () => {
             case 'attendance':
                 return <Attendance />;
             default:
-                return <Dashboard />;
+                return <Dashboard onNavigateToGenie={handleNavigateToGenie} />;
         }
     };
 

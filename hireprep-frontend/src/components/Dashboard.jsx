@@ -1,7 +1,17 @@
-import React from 'react';
-import { TrendingUp, Award, Clock, Briefcase } from 'lucide-react';
+import React, { useState } from 'react';
+import { TrendingUp, Award, Clock, Briefcase, Sparkles } from 'lucide-react';
 
-const Dashboard = () => {
+const Dashboard = ({ onNavigateToGenie }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            onNavigateToGenie(searchQuery.trim());
+            setSearchQuery('');
+        }
+    };
+
     return (
         <div className="page-container">
             <div className="page-header">
@@ -12,6 +22,34 @@ const Dashboard = () => {
                 <button className="btn-primary">
                     Mark Attendance
                 </button>
+            </div>
+
+            {/* HireGenie Quick Search */}
+            <div className="card dashboard-genie-search">
+                <div className="dashboard-genie-header">
+                    <Sparkles className="w-6 h-6" />
+                    <h2 className="dashboard-genie-title">Ask HireGenie</h2>
+                </div>
+                <p className="dashboard-genie-description">
+                    Get instant help with interviews, resume tips, company insights, and more!
+                </p>
+                <form onSubmit={handleSearch} className="dashboard-genie-form">
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="e.g., 'Help me prepare for Google interview' or 'Review my resume'"
+                        className="dashboard-genie-input"
+                    />
+                    <button
+                        type="submit"
+                        disabled={!searchQuery.trim()}
+                        className="dashboard-genie-btn"
+                    >
+                        <Sparkles className="w-5 h-5" />
+                        Ask
+                    </button>
+                </form>
             </div>
 
             <div className="stats-grid">
