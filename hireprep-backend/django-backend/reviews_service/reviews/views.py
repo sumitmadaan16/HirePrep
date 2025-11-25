@@ -5,7 +5,7 @@ from rest_framework import status
 from .models import Review
 from .serializers import ReviewSerializer
 
-# Anyone can view reviews
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_reviews(request):
@@ -13,7 +13,7 @@ def get_reviews(request):
     serializer = ReviewSerializer(reviews, many=True)
     return Response(serializer.data)
 
-# Only students can add reviews
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_review(request):

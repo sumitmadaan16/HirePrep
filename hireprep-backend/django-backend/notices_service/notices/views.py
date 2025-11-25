@@ -6,7 +6,6 @@ from rest_framework import status
 from .models import Notice
 from .serializers import NoticeSerializer
 
-# Anyone can view all notices
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_notices(request):
@@ -15,7 +14,7 @@ def get_notices(request):
     return Response(serializer.data)
 
 
-# Only admin and faculty can create notices
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_notice(request):
@@ -36,7 +35,7 @@ def create_notice(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Only admin and faculty can delete notices
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_notice(request, pk):
@@ -56,7 +55,6 @@ def delete_notice(request, pk):
         return Response({"error": "Notice not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-# Get current user info
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_current_user(request):

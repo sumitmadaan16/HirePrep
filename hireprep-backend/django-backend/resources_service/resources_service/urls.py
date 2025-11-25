@@ -24,5 +24,5 @@ urlpatterns = [
     path('api/', include('resources.urls')),
 ]
 
-# Serve files
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
