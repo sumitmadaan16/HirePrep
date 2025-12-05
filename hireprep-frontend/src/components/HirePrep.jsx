@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
-import AIBot from './AIBot';
 import Dashboard from './Dashboard';
 import Profile from './Profile';
 import Resources from './Resources';
@@ -13,7 +12,6 @@ import HireGenie from './HireGenie';
 
 const HirePrep = () => {
     const [activeSection, setActiveSection] = useState('dashboard');
-    const [showAIBot, setShowAIBot] = useState(false);
     const [geniePrompt, setGeniePrompt] = useState('');
 
     const handleNavigateToGenie = (prompt) => {
@@ -54,7 +52,7 @@ const HirePrep = () => {
                 {renderContent()}
             </div>
 
-            <AIBot showAIBot={showAIBot} setShowAIBot={setShowAIBot} />
+
         </div>
     );
 };

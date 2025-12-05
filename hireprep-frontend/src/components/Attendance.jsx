@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, BookOpen, Check, X, Plus, AlertCircle } from 'lucide-react';
-// import '../index.css';
+import { getUserInfo } from '../utils/auth';
+import { API_BASE_URL, fetchWithAuth } from '../utils/api';
 
 const Attendance = () => {
-    const [userRole, setUserRole] = useState('FACULTY');
-    const [username, setUsername] = useState('alex.johnson.student');
-    // Student state
+    const userInfo = getUserInfo();
+    const [userRole] = useState(userInfo?.role || 'STUDENT');
+    const [username] = useState(userInfo?.username || '');
+
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [filteredRecords, setFilteredRecords] = useState([]);
     const [stats, setStats] = useState(null);
     const [subjects, setSubjects] = useState([]);
     const [selectedSubjectFilter, setSelectedSubjectFilter] = useState('');
+
     // Faculty state
     const [mentees, setMentees] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
@@ -20,13 +23,6 @@ const Attendance = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
-    // Microservices URLs
-    const PROFILE_SERVICE_URL = 'http://localhost:8081/api';
-    const ATTENDANCE_SERVICE_URL = 'http://localhost:8082/api';
-
-    useEffect(() => {
-        fetchUserProfile();
-    }, []);
 
     useEffect(() => {
         if (userRole === 'STUDENT') {
@@ -34,21 +30,7 @@ const Attendance = () => {
         } else if (userRole === 'FACULTY') {
             fetchFacultyData();
         }
-    }, [userRole]);
-
-    const fetchUserProfile = async () => {
-        try {
-            const response = await fetch(`${PROFILE_SERVICE_URL}/profile/${username}`);
-            if (!response.ok) throw new Error('Failed to fetch user profile');
-
-            const data = await response.json();
-            setUserRole(data.role);
-            setUsername(data.username);
-        } catch (err) {
-            console.error('Error fetching user profile:', err);
-            setError('Failed to fetch user profile');
-        }
-    };
+    }, [userRole, username]);
 
     const fetchStudentData = async () => {
         try {
@@ -56,8 +38,8 @@ const Attendance = () => {
             setError(null);
 
             const [recordsResponse, statsResponse] = await Promise.all([
-                fetch(`${ATTENDANCE_SERVICE_URL}/attendance/student/${username}`),
-                fetch(`${ATTENDANCE_SERVICE_URL}/attendance/student/${username}/stats`)
+                fetchWithAuth(`${API_BASE_URL}/api/attendance/student/${username}`),
+                fetchWithAuth(`${API_BASE_URL}/api/attendance/student/${username}/stats`)
             ]);
 
             if (!recordsResponse.ok || !statsResponse.ok) {
@@ -87,8 +69,8 @@ const Attendance = () => {
             setError(null);
 
             const [menteesResponse, subjectsResponse] = await Promise.all([
-                fetch(`${PROFILE_SERVICE_URL}/profile/faculty/${username}/mentees`),
-                fetch(`${ATTENDANCE_SERVICE_URL}/attendance/subjects`)
+                fetchWithAuth(`${API_BASE_URL}/api/profile/faculty/${username}/mentees`),
+                fetchWithAuth(`${API_BASE_URL}/api/attendance/subjects`)
             ]);
 
             if (!menteesResponse.ok || !subjectsResponse.ok) {
@@ -122,6 +104,7 @@ const Attendance = () => {
             }
         }));
     };
+
     const handleRemarksChange = (studentUsername, remarks) => {
         setAttendanceData(prev => ({
             ...prev,
@@ -131,6 +114,7 @@ const Attendance = () => {
             }
         }));
     };
+
     const handleSubmitAttendance = async () => {
         if (!selectedSubject) {
             setError('Please select a subject');
@@ -154,9 +138,8 @@ const Attendance = () => {
                 students: studentsAttendance
             };
 
-            const response = await fetch(`${ATTENDANCE_SERVICE_URL}/attendance/mark`, {
+            const response = await fetchWithAuth(`${API_BASE_URL}/api/attendance/mark`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData)
             });
 
@@ -196,6 +179,7 @@ const Attendance = () => {
             </div>
         );
     }
+
     if (userRole === 'STUDENT') {
         return (
             <div className="page-container">
@@ -208,7 +192,6 @@ const Attendance = () => {
                     </div>
                 )}
 
-                {/* Stats Cards */}
                 {stats && (
                     <div className="attendance-grid">
                         <div className="card attendance-stat-card overall">
@@ -252,6 +235,7 @@ const Attendance = () => {
                         </select>
                     </div>
                 )}
+
                 <div className="card">
                     <h3 className="section-title">Attendance Records</h3>
                     {filteredRecords.length > 0 ? (
@@ -278,19 +262,19 @@ const Attendance = () => {
                                         </td>
                                         <td className="subject-cell">{record.subject}</td>
                                         <td className="status-cell">
-                                                <span className={`status-badge ${record.present ? 'present' : 'absent'}`}>
-                                                    {record.present ? (
-                                                        <>
-                                                            <Check className="icon-tiny" />
-                                                            Present
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <X className="icon-tiny" />
-                                                            Absent
-                                                        </>
-                                                    )}
-                                                </span>
+                                            <span className={`status-badge ${record.present ? 'present' : 'absent'}`}>
+                                                {record.present ? (
+                                                    <>
+                                                        <Check className="icon-tiny" />
+                                                        Present
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <X className="icon-tiny" />
+                                                        Absent
+                                                    </>
+                                                )}
+                                            </span>
                                         </td>
                                         <td>{record.facultyName}</td>
                                         <td className="remarks-cell">{record.remarks || 'No remarks'}</td>
@@ -309,6 +293,7 @@ const Attendance = () => {
             </div>
         );
     }
+
     return (
         <div className="page-container">
             <h1 className="page-title">Mark Attendance</h1>
@@ -326,6 +311,7 @@ const Attendance = () => {
                     {successMessage}
                 </div>
             )}
+
             <div className="card">
                 <div className="attendance-form-header">
                     <div className="form-row">
@@ -362,6 +348,7 @@ const Attendance = () => {
                         </div>
                     </div>
                 </div>
+
                 {selectedSubject ? (
                     <>
                         <h3 className="section-title">

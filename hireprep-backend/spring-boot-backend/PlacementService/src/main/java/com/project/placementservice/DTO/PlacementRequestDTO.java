@@ -13,7 +13,7 @@ public class PlacementRequestDTO {
     private PlacementType type;
     private LocalDate dateOfDrive;
     private LocalDate lastDateToApply;
-    private Double compensation; // Stipend or Salary
+    private Double compensation;
     private String bond;
-    private String postedByUsername; // Faculty username
+    private String postedByUsername;
 }

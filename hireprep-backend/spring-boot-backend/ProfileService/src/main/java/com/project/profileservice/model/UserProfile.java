@@ -36,7 +36,6 @@ public class UserProfile {
     @Column(nullable = false)
     private String gender;
 
-    // Common fields
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "addressLine1", column = @Column(name = "present_line1")),
@@ -55,25 +54,23 @@ public class UserProfile {
     })
     private Address permanentAddress;
 
-    // Student fields
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    // Student fields - Using EAGER fetch to always load education
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_profile_id")
     private List<Education> education;
 
+    @Column(length = 2000)
     private String experience;
-    private String disabilities;
-    private String resumePath;
 
-    // Mentor relationship - only for students
-    @ManyToOne
+    private String disabilities;
+
+    private String resumePath;
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mentor_id")
     private UserProfile mentor;
-
-    // For faculty to see their mentees
-    @OneToMany(mappedBy = "mentor")
+    @OneToMany(mappedBy = "mentor", fetch = FetchType.EAGER)
     private List<UserProfile> mentees;
 
-    // Faculty fields
     private String department;
     private String employeeId;
 }

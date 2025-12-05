@@ -14,11 +14,11 @@ public class Education {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String level; // "Secondary", "senior secondary", "Graduation"
+    private String level;
     private String schoolName;
     private String board;
-    private Integer startYear; // Only for graduation
+    private Integer startYear;
     private int completionYear;
-    private Double percentage; // For 10th and 12th
+    private Double percentage;
     private Double cgpa;
 }

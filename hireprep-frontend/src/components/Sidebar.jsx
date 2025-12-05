@@ -1,5 +1,6 @@
 import React from 'react';
 import { Home, BookOpen, ClipboardList, Briefcase, Calendar, LogOut, User, Star, Megaphone, Sparkles } from 'lucide-react';
+import { logout } from '../utils/auth';
 
 const Sidebar = ({ activeSection, setActiveSection }) => {
     return (
@@ -76,7 +77,7 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
             </nav>
 
             <div className="sidebar-footer">
-                <button className="logout-button">
+                <button onClick={logout} className="logout-button">
                     <LogOut className="w-5 h-5" />
                     <span>Logout</span>
                 </button>

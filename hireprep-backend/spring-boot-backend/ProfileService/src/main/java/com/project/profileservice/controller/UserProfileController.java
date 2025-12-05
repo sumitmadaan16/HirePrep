@@ -1,5 +1,6 @@
 package com.project.profileservice.controller;
 
+import com.project.profileservice.DTO.AuthProfileDTO;
 import com.project.profileservice.DTO.ProfileRequestDTO;
 import com.project.profileservice.DTO.ProfileResponseDTO;
 import com.project.profileservice.service.UserProfileService;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/profile")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class UserProfileController {
 
     @Autowired
@@ -41,6 +42,12 @@ public class UserProfileController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @GetMapping("/auth/{username}")
+    public ResponseEntity<AuthProfileDTO> getProfileForAuth(@PathVariable String username) {
+        return service.findByUsernameForAuth(username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
     @PutMapping("/{username}")
     public ResponseEntity<?> updateProfile(
             @PathVariable String username,
@@ -52,7 +59,6 @@ public class UserProfileController {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             error.put("username", username);
-            // This will help debug - it returns 404 with error message
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
@@ -80,5 +86,9 @@ public class UserProfileController {
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
+    }
+    @GetMapping("/faculty")
+    public ResponseEntity<List<ProfileResponseDTO>> getAllFaculty() {
+        return ResponseEntity.ok(service.getAllFaculty());
     }
 }
