@@ -19,8 +19,6 @@ public class ApplicationMapper {
         dto.setStudentUsername(application.getStudentUsername());
         dto.setAppliedAt(application.getAppliedAt());
         dto.setStatus(application.getStatus());
-
-        // Include placement details
         PlacementResponseDTO placementDTO = placementMapper.toDTO(
                 application.getPlacement(), null, true
         );

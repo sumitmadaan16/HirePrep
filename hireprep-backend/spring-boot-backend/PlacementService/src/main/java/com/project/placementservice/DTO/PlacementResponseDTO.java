@@ -19,5 +19,5 @@ public class PlacementResponseDTO {
     private String bond;
     private String postedByUsername;
     private Integer totalApplications;
-    private Boolean hasApplied; // For student view
+    private Boolean hasApplied;
 }

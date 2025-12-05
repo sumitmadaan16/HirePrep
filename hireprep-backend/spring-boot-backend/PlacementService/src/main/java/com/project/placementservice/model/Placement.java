@@ -20,14 +20,14 @@ public class Placement {
     private String role;
 
     @Column(nullable = false)
-    private String experience; // e.g., "0-1 years", "2-3 years"
+    private String experience;
 
     @Column(nullable = false, length = 2000)
     private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PlacementType type; // INTERNSHIP or FULLTIME
+    private PlacementType type;
 
     @Column(nullable = false)
     private LocalDate datePosted;
@@ -39,12 +39,12 @@ public class Placement {
     private LocalDate lastDateToApply;
 
     @Column(nullable = false)
-    private Double compensation; // Stipend for internship, Salary for fulltime
+    private Double compensation;
 
-    private String bond; // Optional bond details
+    private String bond;
 
     @Column(nullable = false)
-    private String postedByUsername; // Faculty username who posted
+    private String postedByUsername;
 
     @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Application> applications = new ArrayList<>();

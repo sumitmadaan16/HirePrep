@@ -1,5 +1,6 @@
 package com.project.profileservice.service;
 
+import com.project.profileservice.DTO.AuthProfileDTO;
 import com.project.profileservice.DTO.ProfileRequestDTO;
 import com.project.profileservice.DTO.ProfileResponseDTO;
 import com.project.profileservice.mapper.ProfileMapper;
@@ -8,6 +9,7 @@ import com.project.profileservice.model.Role;
 import com.project.profileservice.model.UserProfile;
 import com.project.profileservice.repository.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,13 +27,25 @@ public class UserProfileService {
     @Autowired
     private ProfileMapper mapper;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Transactional
     public ProfileResponseDTO createProfile(ProfileRequestDTO dto) {
+        if (repository.existsByUsername(dto.getUsername())) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+        if (repository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+
         UserProfile profile = mapper.toEntity(dto);
 
-        // Set mentor if student
-        if (dto.getRole() == Role.STUDENT && dto.getMentorUsername() != null) {
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            profile.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        if (dto.getRole() == Role.STUDENT && dto.getMentorUsername() != null && !dto.getMentorUsername().isEmpty()) {
             Optional<UserProfile> mentor = repository.findByUsername(dto.getMentorUsername());
             if (mentor.isPresent() && mentor.get().getRole() == Role.FACULTY) {
                 profile.setMentor(mentor.get());
@@ -44,11 +58,33 @@ public class UserProfileService {
         return mapper.toDTO(saved);
     }
 
+    @Transactional(readOnly = true)
     public Optional<ProfileResponseDTO> findByUsername(String username) {
         return repository.findByUsername(username)
-                .map(mapper::toDTO);
+                .map(profile -> {
+                    if (profile.getRole() == Role.STUDENT) {
+                        if (profile.getEducation() != null) {
+                            profile.getEducation().size();
+                        }
+                        if (profile.getMentor() != null) {
+                            profile.getMentor().getUsername();
+                        }
+                    } else if (profile.getRole() == Role.FACULTY) {
+                        if (profile.getMentees() != null) {
+                            profile.getMentees().size();
+                        }
+                    }
+                    return mapper.toDTO(profile);
+                });
     }
 
+    @Transactional(readOnly = true)
+    public Optional<AuthProfileDTO> findByUsernameForAuth(String username) {
+        return repository.findByUsername(username)
+                .map(mapper::toAuthDTO);
+    }
+
+    @Transactional(readOnly = true)
     public List<ProfileResponseDTO> findAll() {
         return repository.findAll().stream()
                 .map(mapper::toDTO)
@@ -60,7 +96,6 @@ public class UserProfileService {
         UserProfile existing = repository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
 
-        // Update common fields
         existing.setEmail(dto.getEmail());
         existing.setFirstName(dto.getFirstName());
         existing.setLastName(dto.getLastName());
@@ -69,23 +104,23 @@ public class UserProfileService {
         existing.setPresentAddress(dto.getPresentAddress());
         existing.setPermanentAddress(dto.getPermanentAddress());
 
-        // Update password only if provided
+        // Update password if provided
         if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            existing.setPassword(dto.getPassword());
+            existing.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
-        // Role-specific updates
+        // Update role-specific fields
         if (existing.getRole() == Role.STUDENT) {
-            // Handle education update properly
+            // Update education
             if (dto.getEducation() != null) {
-                // Clear existing education (orphanRemoval will delete them)
+                // Clear existing education
                 if (existing.getEducation() != null) {
                     existing.getEducation().clear();
                 } else {
                     existing.setEducation(new ArrayList<>());
                 }
 
-                // Add new education records (without IDs, let JPA generate them)
+                // Add new education entries
                 for (Education edu : dto.getEducation()) {
                     Education newEdu = new Education();
                     newEdu.setLevel(edu.getLevel());
@@ -103,7 +138,7 @@ public class UserProfileService {
             existing.setDisabilities(dto.getDisabilities());
             existing.setResumePath(dto.getResumePath());
 
-            // Update mentor
+            // Update mentor assignment
             if (dto.getMentorUsername() != null && !dto.getMentorUsername().isEmpty()) {
                 Optional<UserProfile> mentor = repository.findByUsername(dto.getMentorUsername());
                 if (mentor.isPresent() && mentor.get().getRole() == Role.FACULTY) {
@@ -112,7 +147,7 @@ public class UserProfileService {
                     throw new IllegalArgumentException("Invalid mentor username or mentor is not a faculty");
                 }
             } else {
-                // If mentorUsername is null or empty, remove the mentor
+                // If no mentor username provided, remove mentor
                 existing.setMentor(null);
             }
         } else if (existing.getRole() == Role.FACULTY) {
@@ -129,6 +164,7 @@ public class UserProfileService {
         repository.findByUsername(username).ifPresent(repository::delete);
     }
 
+    @Transactional(readOnly = true)
     public List<ProfileResponseDTO> getMenteesByFacultyUsername(String facultyUsername) {
         UserProfile faculty = repository.findByUsername(facultyUsername)
                 .orElseThrow(() -> new RuntimeException("Faculty not found"));
@@ -136,8 +172,18 @@ public class UserProfileService {
         if (faculty.getRole() != Role.FACULTY) {
             throw new IllegalArgumentException("User is not a faculty member");
         }
+        if (faculty.getMentees() != null) {
+            faculty.getMentees().size();
+        }
 
         return faculty.getMentees().stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProfileResponseDTO> getAllFaculty() {
+        return repository.findByRole(Role.FACULTY).stream()
                 .map(mapper::toDTO)
                 .collect(Collectors.toList());
     }

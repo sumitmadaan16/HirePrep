@@ -17,19 +17,15 @@ public class ProfileRequestDTO {
     private String phoneNumber;
     private Role role;
     private String gender;
-
-    // Address
     private Address presentAddress;
     private Address permanentAddress;
 
-    // Student-specific
     private List<Education> education;
     private String experience;
     private String disabilities;
     private String resumePath;
-    private String mentorUsername; // Username of the mentor
+    private String mentorUsername;
 
-    // Faculty-specific
     private String department;
     private String employeeId;
 }

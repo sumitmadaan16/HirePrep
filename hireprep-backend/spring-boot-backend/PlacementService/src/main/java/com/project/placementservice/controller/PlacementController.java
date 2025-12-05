@@ -15,7 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/placements")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class PlacementController {
 
     @Autowired

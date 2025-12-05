@@ -1,5 +1,6 @@
 package com.project.profileservice.mapper;
 
+import com.project.profileservice.DTO.AuthProfileDTO;
 import com.project.profileservice.DTO.ProfileRequestDTO;
 import com.project.profileservice.DTO.ProfileResponseDTO;
 import com.project.profileservice.model.Role;
@@ -15,7 +16,7 @@ public class ProfileMapper {
         UserProfile profile = new UserProfile();
         profile.setUsername(dto.getUsername());
         profile.setEmail(dto.getEmail());
-        profile.setPassword(dto.getPassword()); // Will be encoded in service
+        profile.setPassword(dto.getPassword());
         profile.setFirstName(dto.getFirstName());
         profile.setLastName(dto.getLastName());
         profile.setPhoneNumber(dto.getPhoneNumber());
@@ -24,7 +25,6 @@ public class ProfileMapper {
         profile.setPresentAddress(dto.getPresentAddress());
         profile.setPermanentAddress(dto.getPermanentAddress());
 
-        // Role-specific fields
         if (dto.getRole() == Role.STUDENT) {
             profile.setEducation(dto.getEducation());
             profile.setExperience(dto.getExperience());
@@ -51,14 +51,11 @@ public class ProfileMapper {
         dto.setPresentAddress(profile.getPresentAddress());
         dto.setPermanentAddress(profile.getPermanentAddress());
 
-        // Role-specific fields
         if (profile.getRole() == Role.STUDENT) {
             dto.setEducation(profile.getEducation());
             dto.setExperience(profile.getExperience());
             dto.setDisabilities(profile.getDisabilities());
             dto.setResumePath(profile.getResumePath());
-
-            // Mentor info
             if (profile.getMentor() != null) {
                 ProfileResponseDTO.MentorBasicDTO mentorDTO = new ProfileResponseDTO.MentorBasicDTO();
                 mentorDTO.setId(profile.getMentor().getId());
@@ -72,8 +69,6 @@ public class ProfileMapper {
         } else if (profile.getRole() == Role.FACULTY) {
             dto.setDepartment(profile.getDepartment());
             dto.setEmployeeId(profile.getEmployeeId());
-
-            // Mentees info
             if (profile.getMentees() != null && !profile.getMentees().isEmpty()) {
                 dto.setMentees(profile.getMentees().stream()
                         .map(mentee -> {
@@ -90,5 +85,16 @@ public class ProfileMapper {
         }
 
         return dto;
+    }
+
+    public AuthProfileDTO toAuthDTO(UserProfile profile) {
+        return new AuthProfileDTO(
+                profile.getUsername(),
+                profile.getPassword(),
+                profile.getEmail(),
+                profile.getRole(),
+                profile.getFirstName(),
+                profile.getLastName()
+        );
     }
 }
